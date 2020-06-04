@@ -36,11 +36,11 @@ def generate_report(report: dict) -> str:
 
 def open_log_file(filename: str) -> Generator:
     if filename.endswith('.gz'):
-        file = gzip.open(filename=filename, mode='r')
+        file = gzip.open(filename=filename, mode='rb')
     else:
         file = open(file=filename, mode='r')
     for line in file:
-        yield line
+        yield line.decode()
     file.close()
 
 
