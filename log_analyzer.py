@@ -1,6 +1,7 @@
 import re
 import gzip
 import json
+import logging
 import argparse
 
 from typing import Generator, Iterable
@@ -44,12 +45,19 @@ def open_log_file(filename: str) -> Generator:
 
 
 def main() -> None:
-    pass
-
-
-if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument(name='--config', nargs=1, dest='config', default=None)
     args = parser.parse_args()
     if args.config is not None:
         pass
+
+
+if __name__ == '__main__':
+    logging.basicConfig(filename=config['OWN_LOG_FILE'] or None,
+                        level=logging.INFO,
+                        format='[%(asctime)s] %(levelname).1s %(message)s',
+                        datefmt='%Y.%m.%d %H:%M:%S')
+    try:
+        main()
+    except Exception as e:
+        logging.exception(e)
