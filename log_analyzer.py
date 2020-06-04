@@ -34,7 +34,7 @@ def generate_report(report: dict) -> str:
 
 
 def open_log_file(filename: str) -> Generator:
-    if filename.endswith('.bz2'):
+    if filename.endswith('.gz'):
         file = gzip.open(filename=filename, mode='r')
     else:
         file = open(file=filename, mode='r')
