@@ -48,4 +48,8 @@ def main() -> None:
 
 
 if __name__ == '__main__':
-    pass
+    parser = argparse.ArgumentParser()
+    parser.add_argument(name='--config', nargs=1, dest='config', default=None)
+    args = parser.parse_args()
+    if args.config is not None:
+        pass
