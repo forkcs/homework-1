@@ -1,18 +1,51 @@
-# log_format ui_short '$remote_addr  $remote_user $http_x_real_ip [$time_local] "$request" '
-#                     '$status $body_bytes_sent "$http_referer" '
-#                     '"$http_user_agent" "$http_x_forwarded_for" "$http_X_REQUEST_ID" "$http_X_RB_USER" '
-#                     '$request_time';
+import re
+import gzip
+import json
+import argparse
+
+from typing import Generator, Iterable
+
+from string import Template
+
 
 config = {
-    "REPORT_SIZE": 1000,
-    "REPORT_DIR": "./reports",
-    "LOG_DIR": "./log"
+    'REPORT_SIZE': 1000,
+    'REPORT_DIR': './reports',
+    'LOG_DIR': './log'
 }
 
+with open('report.html', 'r') as report_template:
+    REPORT_TEMPLATE = report_template.read()
 
-def main():
+
+def get_last_log_filename(logs_dir: str) -> str:
     pass
 
 
-if __name__ == "__main__":
-    main()
+def generate_report_dict(log_file: Iterable) -> dict:
+    for line in log_file:
+        pass
+
+
+def generate_report(report: dict) -> str:
+    report_json = json.dumps(report)
+    report_html_template = Template(REPORT_TEMPLATE).safe_substitute(table_json=report_json)
+    return report_html_template
+
+
+def open_log_file(filename: str) -> Generator:
+    if filename.endswith('.bz2'):
+        file = gzip.open(filename=filename, mode='r')
+    else:
+        file = open(file=filename, mode='r')
+    for line in file:
+        yield line
+    file.close()
+
+
+def main() -> None:
+    pass
+
+
+if __name__ == '__main__':
+    pass
