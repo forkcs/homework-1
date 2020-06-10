@@ -38,7 +38,7 @@ def find_log_file(log_files, log_dir):
             date = re.findall(r'\d{8}', f)[0]
             break
     if not new_log_file:
-        logging.error('There are no log files in the directory')
+        logging.info('There are no log files in the directory')
         return False
     log_file_path = os.path.join(log_dir, new_log_file)
 
