@@ -62,10 +62,10 @@ def read_log_file(log_file_destination):
     if log_file_destination.endswith('.gz'):
         log_file = gzip.open(log_file_destination, 'rb')
     else:
-        log_file = open(log_file_destination)
+        log_file = open(log_file_destination, 'rb')
     for line in log_file:
         if line:
-            yield line
+            yield line.decode('utf-8')
     log_file.close()
 
 
