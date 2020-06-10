@@ -1,6 +1,6 @@
 # Log analyzer
 
-**Log analyzer** is a script for analyze nginx logs. It made just for education purposes.
+**Log analyzer** is a script for analyze nginx logs. It is made just for education purposes.
 
 ## Installation
 Download the project
