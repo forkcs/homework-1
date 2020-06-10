@@ -8,6 +8,8 @@ from string import Template
 from argparse import ArgumentParser
 from collections import defaultdict, namedtuple
 
+from typing import Iterable, Iterator
+
 CONFIG = {
     'REPORT_SIZE': 100,
     'REPORT_DIR': './reports',
@@ -18,7 +20,7 @@ CONFIG = {
 REPORT_TEMPLATE_PATH = './report.html'
 
 
-def read_config_file(config, config_file_path):
+def read_config_file(config: dict, config_file_path: str) -> dict:
     if config_file_path is not None:
         with open(config_file_path) as config_file:
             config_form_file = json.load(config_file)
@@ -26,7 +28,7 @@ def read_config_file(config, config_file_path):
     return config
 
 
-def find_log_file(log_files, log_dir):
+def find_log_file(log_files: Iterable, log_dir: str) -> namedtuple:
 
     log_files = sorted(log_files, reverse=True)
 
@@ -48,7 +50,7 @@ def find_log_file(log_files, log_dir):
     return actual_log_file
 
 
-def if_there_are_a_report(report_dir, date):
+def if_there_are_a_report(report_dir: str, date: str) -> bool:
     report_name = f'report-{date}.html'
     report_file = os.path.join(report_dir, report_name)
     if os.path.exists(report_file):
@@ -58,7 +60,7 @@ def if_there_are_a_report(report_dir, date):
         return False
 
 
-def read_log_file(log_file_destination):
+def read_log_file(log_file_destination: str) -> Iterator:
     if log_file_destination.endswith('.gz'):
         log_file = gzip.open(log_file_destination, 'rb')
     else:
@@ -69,7 +71,7 @@ def read_log_file(log_file_destination):
     log_file.close()
 
 
-def parse_line(line):
+def parse_line(line: str) -> tuple:
     address_pattern = r'\B(?:/(?:[\w?=_&-]+))+'
     time_pattern = r'\d+\.\d+$'
     match_address = re.findall(address_pattern, line)
@@ -79,7 +81,7 @@ def parse_line(line):
     return False
 
 
-def median(lst):
+def median(lst: Iterable) -> float:
     n = len(lst)
     if n < 1:
         return None
@@ -88,7 +90,7 @@ def median(lst):
     return sum(sorted(lst)[n // 2 - 1:n // 2 + 1]) / 2.0
 
 
-def aggregate_logs(log_iterator, parsed_persent_from_config):
+def aggregate_logs(log_iterator: Iterable, parsed_persent_from_config: int) -> list:
     logging.info('Aggregating raw data...')
     log_statistics = defaultdict(list)
     log_statistics['count_all'] = 0
@@ -140,7 +142,7 @@ def aggregate_logs(log_iterator, parsed_persent_from_config):
     return result_table
 
 
-def generate_report_from_template(result_table, destination, report_size):
+def generate_report_from_template(result_table: list, destination: str, report_size: int) -> None:
     sorted_result_json = json.dumps(sorted(result_table,
                                            key=lambda k: k['time_sum'],
                                            reverse=True)[:report_size])
@@ -154,7 +156,7 @@ def generate_report_from_template(result_table, destination, report_size):
     logging.info(f'HTML report is written to: {destination}')
 
 
-def main(config):
+def main(config: dict) -> None:
     # read all files in directory and check that logs exists
     try:
         log_files = os.listdir(CONFIG['LOG_DIR'])
