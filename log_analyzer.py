@@ -23,7 +23,7 @@ REPORT_TEMPLATE_PATH = './report.html'
 def parse_console_args():
     parser = ArgumentParser()
     parser.add_argument("--config", dest='config_file',
-                        default=None, type=str)
+                        default='log_analyzer.json', type=str)
 
     return parser.parse_args()
 
