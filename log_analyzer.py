@@ -20,6 +20,14 @@ CONFIG = {
 REPORT_TEMPLATE_PATH = './report.html'
 
 
+def parse_console_args():
+    parser = ArgumentParser()
+    parser.add_argument("--config", dest='config_file',
+                        default=None, type=str)
+
+    return parser.parse_args()
+
+
 def read_config_file(config: dict, config_file_path: str) -> dict:
     if config_file_path is not None:
         with open(config_file_path) as config_file:
@@ -184,11 +192,8 @@ def main(config: dict) -> None:
 
 if __name__ == "__main__":
 
-    parser = ArgumentParser()
-    parser.add_argument("--config", dest='config_file',
-                        default=None, type=str)
-
-    config_destination = parser.parse_args().config_file
+    args = parse_console_args()
+    config_destination = args.config_file
 
     conf = read_config_file(CONFIG, config_destination)
 
