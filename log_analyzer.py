@@ -102,7 +102,7 @@ def median(lst: Iterable) -> float:
     return sum(sorted(lst)[n // 2 - 1:n // 2 + 1]) / 2.0
 
 
-def aggregate_logs(log_iterator: Iterable, parsed_persent_from_config: int) -> list:
+def aggregate_logs(log_iterator: Iterable, parsed_percent_from_config: int) -> list:
     logging.info('Aggregating raw data...')
     log_statistics = defaultdict(list)
     log_statistics['count_all'] = 0
@@ -124,7 +124,7 @@ def aggregate_logs(log_iterator: Iterable, parsed_persent_from_config: int) -> l
 
     parsed_percent = log_statistics['count_all'] * 100 / processed
     logging.info(f'{parsed_percent}% of log lines are parsed')
-    if parsed_percent < parsed_persent_from_config:
+    if parsed_percent < parsed_percent_from_config:
         raise RuntimeError('Fatal problem in log file')
 
     logging.info('Recalculating aggregated table...')
