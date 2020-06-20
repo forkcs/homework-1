@@ -111,8 +111,9 @@ def aggregate_logs(log_iterator: Iterable, parsed_percent_from_config: int) -> l
 
     for line in log_iterator:
         processed += 1
-        if parse_line(line):
-            url, time_opened = parse_line(line)
+        parsed_line = parse_line(line)
+        if parsed_line:
+            url, time_opened = parsed_line
             log_statistics['count_all'] += 1
             log_statistics['time_all'] += float(time_opened)
         else:
