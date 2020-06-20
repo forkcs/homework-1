@@ -61,10 +61,14 @@ def find_log_file(log_files: Iterable, log_dir: str) -> NamedTuple:
     return actual_log_file
 
 
-def is_report_existing(report_dir: str, date: str) -> bool:
+def generate_new_report_filename(report_dir: str, date: str) -> str:
     report_name = f'report-{date}.html'
-    report_file = os.path.join(report_dir, report_name)
-    if os.path.exists(report_file):
+    report_filename = os.path.join(report_dir, report_name)
+    return report_filename
+
+
+def is_report_existing(report_filename: str) -> bool:
+    if os.path.exists(report_filename):
         logging.info('Your report is already in the report folder')
         return True
     else:
@@ -177,17 +181,17 @@ def main(config: dict) -> None:
     if not actual_log_file:
         sys.exit()
 
+    report_path = generate_new_report_filename(config['REPORT_DIR'], actual_log_file.date)
+
     # check if report exists
-    if is_report_existing(config['REPORT_DIR'], actual_log_file.date):
+    if is_report_existing(report_path):
         sys.exit()
 
     # parsing and aggregate raw data from log file
     log_iterator = read_log_file(actual_log_file.path, actual_log_file.gzipped)
     result_table = aggregate_logs(log_iterator, config['PARSED_PERCENTS'])
 
-    # generate report from template
-    new_report_name = f'{config["REPORT_DIR"]}/report-{actual_log_file.date}.html'
-    generate_report_from_template(result_table, new_report_name, config['REPORT_SIZE'])
+    generate_report_from_template(result_table, report_path, config['REPORT_SIZE'])
 
 
 if __name__ == "__main__":
