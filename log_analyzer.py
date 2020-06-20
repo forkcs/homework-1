@@ -8,7 +8,7 @@ from string import Template
 from argparse import ArgumentParser
 from collections import defaultdict, namedtuple
 
-from typing import Iterable, Iterator
+from typing import Iterable, Iterator, NamedTuple
 
 CONFIG = {
     'REPORT_SIZE': 100,
@@ -36,7 +36,7 @@ def read_config_file(config: dict, config_file_path: str) -> dict:
     return config
 
 
-def find_log_file(log_files: Iterable, log_dir: str) -> namedtuple:
+def find_log_file(log_files: Iterable, log_dir: str) -> NamedTuple:
 
     log_files = sorted(log_files, reverse=True)
 
