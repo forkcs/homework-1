@@ -71,15 +71,12 @@ def is_report_existing(report_dir: str, date: str) -> bool:
         return False
 
 
-def read_log_file(log_file_destination: str) -> Iterator:
-    if log_file_destination.endswith('.gz'):
-        log_file = gzip.open(log_file_destination, 'rb')
-    else:
-        log_file = open(log_file_destination, 'rb')
-    for line in log_file:
-        if line:
-            yield line.decode('utf-8')
-    log_file.close()
+def read_log_file(log_file_destination: str, gzipped: bool) -> Iterator:
+    log_file = open(log_file_destination, 'rb') if not gzipped else gzip.open(log_file_destination, 'rb')
+    with log_file:
+        for line in log_file:
+            if line:
+                yield line.decode('utf-8')
 
 
 def parse_line(line: str) -> tuple:
@@ -185,7 +182,7 @@ def main(config: dict) -> None:
         sys.exit()
 
     # parsing and aggregate raw data from log file
-    log_iterator = read_log_file(actual_log_file.path)
+    log_iterator = read_log_file(actual_log_file.path, actual_log_file.gzipped)
     result_table = aggregate_logs(log_iterator, config['PARSED_PERCENTS'])
 
     # generate report from template
