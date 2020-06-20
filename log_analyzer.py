@@ -42,18 +42,21 @@ def find_log_file(log_files: Iterable, log_dir: str) -> namedtuple:
 
     new_log_file = ''
     date = None
+    is_gzipped = None
     for f in log_files:
-        if re.match(r'nginx-access-ui.log-\d{8}(.gz)?', f):
+        filename = re.match(r'nginx-access-ui.log-(\d{8})(.gz)?', f)
+        if filename:
             new_log_file = f
-            date = re.findall(r'\d{8}', f)[0]
+            date = filename.group(1)
+            is_gzipped = filename.group(2) is not None
             break
     if not new_log_file:
         logging.info('There are no log files in the directory')
-        return False
+        return None
     log_file_path = os.path.join(log_dir, new_log_file)
 
-    Logfile = namedtuple('Logfile', ['path', 'date'])
-    actual_log_file = Logfile(log_file_path, date)
+    Logfile = namedtuple('Logfile', ['path', 'date', 'gzipped'])
+    actual_log_file = Logfile(log_file_path, date, is_gzipped)
 
     return actual_log_file
 
