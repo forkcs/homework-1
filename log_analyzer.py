@@ -108,8 +108,8 @@ def median(lst: Iterable) -> float:
 def aggregate_logs(log_iterator: Iterable, parsed_percent_from_config: int) -> list:
     logging.info('Aggregating raw data...')
     log_statistics = defaultdict(list)
-    log_statistics['count_all'] = 0
-    log_statistics['time_all'] = 0
+    count_all = 0
+    time_all = 0
     processed = 0
 
     for line in log_iterator:
@@ -117,16 +117,16 @@ def aggregate_logs(log_iterator: Iterable, parsed_percent_from_config: int) -> l
         parsed_line = parse_line(line)
         if parsed_line:
             url, time_opened = parsed_line
-            log_statistics['count_all'] += 1
-            log_statistics['time_all'] += float(time_opened)
+            count_all += 1
+            time_all += float(time_opened)
         else:
             continue
         log_statistics[url].append(float(time_opened))
 
         if processed % 10000 == 0:
-            logging.info(f'Parsed {processed} lines')
+            logging.debug(f'Parsed {processed} lines')
 
-    parsed_percent = log_statistics['count_all'] * 100 / processed
+    parsed_percent = count_all * 100 / processed
     logging.info(f'{parsed_percent}% of log lines are parsed')
     if parsed_percent < parsed_percent_from_config:
         raise RuntimeError('Fatal problem in log file')
@@ -137,22 +137,20 @@ def aggregate_logs(log_iterator: Iterable, parsed_percent_from_config: int) -> l
     processed = 0
     for url in log_statistics:
         processed += 1
-        if url in ['count_all', 'time_all']:
-            continue
         times = log_statistics[url]
         counts = len(log_statistics[url])
         line = {
             'count': counts,
-            'time_avg': sum(times) / counts,
-            'time_max': max(times),
-            'time_sum': sum(times),
+            'time_avg': round(sum(times) / counts, 3),
+            'time_max': round(max(times), 3),
+            'time_sum': round(sum(times), 3),
             'url': url,
-            'time_med': median(times),
-            'time_perc': sum(times) * 100 / log_statistics['time_all'],
-            'count_perc': counts * 100 / log_statistics['count_all']
+            'time_med': round(median(times), 3),
+            'time_perc': round(sum(times) * 100 / time_all, 3),
+            'count_perc': round(counts * 100 / count_all, 3)
         }
         if processed % 10000 == 0:
-            logging.info('Calculated {} lines'.format(processed))
+            logging.debug(f'Calculated {processed} lines')
         result_table.append(line)
 
     return result_table
@@ -167,6 +165,7 @@ def generate_report_from_template(result_table: list, destination: str, report_s
     with open(REPORT_TEMPLATE_PATH, 'r') as html_template:
         template_data = Template(html_template.read())
     report_data = template_data.safe_substitute(table_json=sorted_result_json)
+
     with open(destination, 'w') as html_report:
         html_report.write(report_data)
     logging.info(f'HTML report is written to: {destination}')
@@ -177,13 +176,16 @@ def main(config: dict) -> None:
     try:
         log_files = os.listdir(CONFIG['LOG_DIR'])
     except OSError:
-        logging.error('Can`t find directories for logs or reports.')
+        logging.error('Can`t find directory for logs.')
         sys.exit()
 
     actual_log_file = find_log_file(log_files, config['LOG_DIR'])
 
     if not actual_log_file:
         sys.exit()
+
+    if not os.path.exists(config['REPORT_DIR']):
+        os.mkdir(config['REPORT_DIR'])
 
     report_path = generate_new_report_filename(config['REPORT_DIR'], actual_log_file.date)
 
