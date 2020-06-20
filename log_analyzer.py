@@ -19,6 +19,10 @@ CONFIG = {
 
 REPORT_TEMPLATE_PATH = './report.html'
 
+LOGFILE_PATTERN = re.compile(r'nginx-access-ui.log-(\d{8})(.gz)?')
+ADDRESS_PATTERN = re.compile(r'\B(?:/(?:[\w?=_&-]+))+')
+TIME_PATTERN = re.compile(r'\d+\.\d+$')
+
 
 def parse_console_args():
     parser = ArgumentParser()
@@ -44,7 +48,7 @@ def find_log_file(log_files: Iterable, log_dir: str) -> NamedTuple:
     date = None
     is_gzipped = None
     for f in log_files:
-        filename = re.match(r'nginx-access-ui.log-(\d{8})(.gz)?', f)
+        filename = re.match(LOGFILE_PATTERN, f)
         if filename:
             new_log_file = f
             date = filename.group(1)
@@ -84,12 +88,11 @@ def read_log_file(log_file_destination: str, gzipped: bool) -> Iterator:
 
 
 def parse_line(line: str) -> tuple:
-    address_pattern = r'\B(?:/(?:[\w?=_&-]+))+'
-    time_pattern = r'\d+\.\d+$'
-    match_address = re.findall(address_pattern, line)
+    match_time = re.findall(TIME_PATTERN, line)
+    match_address = re.findall(ADDRESS_PATTERN, line)
     if match_address:
-        return (re.findall(address_pattern, line)[0],
-                re.findall(time_pattern, line)[0])
+        return (match_address[0],
+                match_time[0])
     return None
 
 
