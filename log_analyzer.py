@@ -89,7 +89,7 @@ def parse_line(line: str) -> tuple:
     if match_address:
         return (re.findall(address_pattern, line)[0],
                 re.findall(time_pattern, line)[0])
-    return False
+    return None
 
 
 def median(lst: Iterable) -> float:
