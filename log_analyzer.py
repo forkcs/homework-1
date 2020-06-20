@@ -61,7 +61,7 @@ def find_log_file(log_files: Iterable, log_dir: str) -> NamedTuple:
     return actual_log_file
 
 
-def if_there_are_a_report(report_dir: str, date: str) -> bool:
+def is_report_existing(report_dir: str, date: str) -> bool:
     report_name = f'report-{date}.html'
     report_file = os.path.join(report_dir, report_name)
     if os.path.exists(report_file):
@@ -181,7 +181,7 @@ def main(config: dict) -> None:
         sys.exit()
 
     # check if report exists
-    if if_there_are_a_report(config['REPORT_DIR'], actual_log_file.date):
+    if is_report_existing(config['REPORT_DIR'], actual_log_file.date):
         sys.exit()
 
     # parsing and aggregate raw data from log file
