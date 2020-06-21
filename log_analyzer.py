@@ -61,6 +61,7 @@ def find_log_file(log_files: Iterable, log_dir: str) -> NamedTuple:
 
     Logfile = namedtuple('Logfile', ['path', 'date', 'gzipped'])
     actual_log_file = Logfile(log_file_path, date, is_gzipped)
+    logging.info(f'Found log file in {log_file_path}')
 
     return actual_log_file
 
@@ -73,7 +74,7 @@ def generate_new_report_filename(report_dir: str, date: str) -> str:
 
 def is_report_existing(report_filename: str) -> bool:
     if os.path.exists(report_filename):
-        logging.info('Your report is already in the report folder')
+        logging.info(f'Your report is already in: {report_filename}')
         return True
     else:
         return False
@@ -126,7 +127,7 @@ def aggregate_logs(log_iterator: Iterable, parsed_percent_from_config: int) -> N
         if processed % 10000 == 0:
             logging.debug(f'Parsed {processed} lines')
 
-    parsed_percent = count_all * 100 / processed
+    parsed_percent = round(count_all * 100 / processed, 2)
     logging.info(f'{parsed_percent}% of log lines are parsed')
     if parsed_percent < parsed_percent_from_config:
         raise RuntimeError('Fatal problem in log file')
