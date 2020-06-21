@@ -105,9 +105,9 @@ def median(lst: Iterable) -> float:
     return sum(sorted(lst)[n // 2 - 1:n // 2 + 1]) / 2.0
 
 
-def aggregate_logs(log_iterator: Iterable, parsed_percent_from_config: int) -> list:
+def aggregate_logs(log_iterator: Iterable, parsed_percent_from_config: int) -> NamedTuple:
     logging.info('Aggregating raw data...')
-    log_statistics = defaultdict(list)
+    time_per_url = defaultdict(list)
     count_all = 0
     time_all = 0
     processed = 0
@@ -121,7 +121,7 @@ def aggregate_logs(log_iterator: Iterable, parsed_percent_from_config: int) -> l
             time_all += float(time_opened)
         else:
             continue
-        log_statistics[url].append(float(time_opened))
+        time_per_url[url].append(float(time_opened))
 
         if processed % 10000 == 0:
             logging.debug(f'Parsed {processed} lines')
@@ -131,14 +131,19 @@ def aggregate_logs(log_iterator: Iterable, parsed_percent_from_config: int) -> l
     if parsed_percent < parsed_percent_from_config:
         raise RuntimeError('Fatal problem in log file')
 
+    LogStatistics = namedtuple('LogStatistics', ['time_all', 'count_all', 'time_per_url'])
+    return LogStatistics(time_all, count_all, time_per_url)
+
+
+def generate_result_table(time_per_url: list, time_all: float, count_all: int) -> list:
     logging.info('Recalculating aggregated table...')
 
     result_table = []
     processed = 0
-    for url in log_statistics:
+    for url in time_per_url:
         processed += 1
-        times = log_statistics[url]
-        counts = len(log_statistics[url])
+        times = time_per_url[url]
+        counts = len(time_per_url[url])
         line = {
             'count': counts,
             'time_avg': round(sum(times) / counts, 3),
@@ -195,7 +200,8 @@ def main(config: dict) -> None:
 
     # parsing and aggregate raw data from log file
     log_iterator = read_log_file(actual_log_file.path, actual_log_file.gzipped)
-    result_table = aggregate_logs(log_iterator, config['PARSED_PERCENTS'])
+    stats = aggregate_logs(log_iterator, config['PARSED_PERCENTS'])
+    result_table = generate_result_table(stats.time_per_url, stats.time_all, stats.count_all)
 
     generate_report_from_template(result_table, report_path, config['REPORT_SIZE'])
 
