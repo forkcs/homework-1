@@ -94,8 +94,9 @@ def parse_line(line: str) -> Optional[tuple]:
     match_time = TIME_PATTERN.search(line)
     if match_time:
         match_address = ADDRESS_PATTERN.search(line)
-        return (match_address,
-                match_time)
+        if match_address:
+            return (match_address[0],
+                    match_time[0])
     return None
 
 
