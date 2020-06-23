@@ -50,12 +50,12 @@ def find_log_file(log_files: Iterable, log_dir: str) -> Optional[Logfile]:
     new_log_file = ''
     date = None
     is_gzipped = None
-    for f in log_files:
-        filename = re.match(LOGFILE_PATTERN, f)
-        if filename:
-            new_log_file = f
-            date = filename.group(1)
-            is_gzipped = filename.group(2) is not None
+    for filename in log_files:
+        filename_match = LOGFILE_PATTERN.match(filename)
+        if filename_match:
+            new_log_file = filename
+            date = filename_match.group(1)
+            is_gzipped = filename_match.group(2) is not None
             break
     if not new_log_file:
         logging.info('There are no log files in the directory')
@@ -91,11 +91,11 @@ def read_log_file(log_file_destination: str, gzipped: bool) -> Iterator:
 
 
 def parse_line(line: str) -> Optional[tuple]:
-    match_time = re.findall(TIME_PATTERN, line)
-    match_address = re.findall(ADDRESS_PATTERN, line)
+    match_time = TIME_PATTERN.search(line)
+    match_address = ADDRESS_PATTERN.search(line)
     if match_address:
-        return (match_address[0],
-                match_time[0])
+        return (match_address,
+                match_time)
     return None
 
 
