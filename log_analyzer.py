@@ -8,7 +8,7 @@ from string import Template
 from argparse import ArgumentParser
 from collections import defaultdict, namedtuple
 
-from typing import Iterable, Iterator
+from typing import Iterable, Iterator, Optional
 
 CONFIG = {
     'REPORT_SIZE': 100,
@@ -43,7 +43,7 @@ def read_config_file(config: dict, config_file_path: str) -> dict:
     return config
 
 
-def find_log_file(log_files: Iterable, log_dir: str) -> Logfile:
+def find_log_file(log_files: Iterable, log_dir: str) -> Optional[Logfile]:
 
     log_files = sorted(log_files, reverse=True)
 
@@ -90,7 +90,7 @@ def read_log_file(log_file_destination: str, gzipped: bool) -> Iterator:
                 yield line.decode('utf-8')
 
 
-def parse_line(line: str) -> tuple:
+def parse_line(line: str) -> Optional[tuple]:
     match_time = re.findall(TIME_PATTERN, line)
     match_address = re.findall(ADDRESS_PATTERN, line)
     if match_address:
@@ -99,10 +99,10 @@ def parse_line(line: str) -> tuple:
     return None
 
 
-def median(lst: Iterable) -> float:
+def median(lst: list) -> float:
     n = len(lst)
     if n < 1:
-        return None
+        raise AttributeError('Argument "lst" must contain any elements.')
     if n % 2 == 1:
         return sorted(lst)[n // 2]
     return sum(sorted(lst)[n // 2 - 1:n // 2 + 1]) / 2.0
@@ -112,7 +112,7 @@ def aggregate_logs(log_iterator: Iterable, parsed_percent_from_config: int) -> L
     logging.info('Aggregating raw data...')
     time_per_url = defaultdict(list)
     count_all = 0
-    time_all = 0
+    time_all = 0.0
     processed = 0
 
     for line in log_iterator:
@@ -181,7 +181,7 @@ def generate_report_from_template(result_table: list, destination: str, report_s
 def main(config: dict) -> None:
     # read all files in directory and check that logs exists
     try:
-        log_files = os.listdir(CONFIG['LOG_DIR'])
+        log_files = os.listdir(path=CONFIG['LOG_DIR'])
     except OSError:
         logging.error('Can`t find directory for logs.')
         sys.exit()
