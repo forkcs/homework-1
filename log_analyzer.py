@@ -83,8 +83,8 @@ def is_report_existing(report_filename: str) -> bool:
 
 
 def read_log_file(log_file_destination: str, gzipped: bool) -> Iterator:
-    log_file = open(log_file_destination, 'rb') if not gzipped else gzip.open(log_file_destination, 'rb')
-    with log_file:
+    log_file_opener = open if not gzipped else gzip.open
+    with log_file_opener(log_file_destination, 'rb') as log_file:
         for line in log_file:
             if line:
                 yield line.decode('utf-8')
@@ -92,8 +92,8 @@ def read_log_file(log_file_destination: str, gzipped: bool) -> Iterator:
 
 def parse_line(line: str) -> Optional[tuple]:
     match_time = TIME_PATTERN.search(line)
-    match_address = ADDRESS_PATTERN.search(line)
-    if match_address:
+    if match_time:
+        match_address = ADDRESS_PATTERN.search(line)
         return (match_address,
                 match_time)
     return None
@@ -146,14 +146,15 @@ def generate_result_table(log_stats: LogStatistics) -> list:
         processed += 1
         times = log_stats.time_per_url[url]
         counts = len(log_stats.time_per_url[url])
+        time_sum = sum(times)
         line = {
             'count': counts,
-            'time_avg': round(sum(times) / counts, 3),
+            'time_avg': round(time_sum / counts, 3),
             'time_max': round(max(times), 3),
-            'time_sum': round(sum(times), 3),
+            'time_sum': round(time_sum, 3),
             'url': url,
             'time_med': round(median(times), 3),
-            'time_perc': round(sum(times) * 100 / log_stats.time_all, 3),
+            'time_perc': round(time_sum * 100 / log_stats.time_all, 3),
             'count_perc': round(counts * 100 / log_stats.count_all, 3)
         }
         if processed % 10000 == 0:
@@ -211,9 +212,8 @@ def main(config: dict) -> None:
 if __name__ == "__main__":
 
     args = parse_console_args()
-    config_destination = args.config_file
 
-    conf = read_config_file(CONFIG, config_destination)
+    conf = read_config_file(CONFIG, args.config_file)
 
     logging.basicConfig(filename=conf.get('MONITORING_LOG', None),
                         level=logging.INFO,
