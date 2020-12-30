@@ -5,7 +5,7 @@
 ## Installation
 Download the project
 ``` 
-git clone https://github.com/forkcs/training_log_analyzer.git
+git clone https://github.com/forkcs/homework-1.git
 cd log_analyzer/
 ```
 
